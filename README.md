@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quel personnage de Batman es-tu ?</title>
+  <style>
+    body {
+      font-family: 'Courier New', monospace;
+      background-color: #0d0d0d;
+      color: #f0f0f0;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #ffcc00;
+      text-shadow: 2px 2px 5px #000;
+      font-size: 40px;
+      margin-bottom: 20px;
+    }
+
+    img.logo {
+      max-width: 200px;
+      margin-bottom: 20px;
+    }
+
+    .question {
+      margin: 20px 0;
+      background-color: #1a1a1a;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+    }
+
+    .options button {
+      background-color: #ffcc00;
+      color: #000;
+      padding: 10px 20px;
+      border: none;
+      margin: 5px;
+      font-size: 18px;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+    }
+
+    .options button:hover {
+      background-color: #ffa500;
+      transform: scale(1.1);
+    }
+
+    .result {
+      background-color: #1a1a1a;
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 20px;
+      display: none;
+      box-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+    }
+
+    .score {
+      font-size: 18px;
+      margin-top: 10px;
+      color: #ffcc00;
+    }
+  </style>
+</head>
+<body>
+  <img class="logo" src="https://zupimages.net/up/25/16/71ta.png" alt="Logo Batman">
+  <h1>Quel personnage de Batman es-tu ?</h1>
+
+  <div id="quiz-container">
+    <div class="question" id="question-container">
+      <h2 id="question-text"></h2>
+      <div class="options" id="options-container"></div>
+    </div>
+  </div>
+
+  <div class="result" id="result-container">
+    <h2>Tu es...</h2>
+    <p id="result-text"></p>
+    <p class="score">Résultat 100% Gotham approved.</p>
+    <button onclick="startQuiz()">Refaire le quiz</button>
+  </div>
+
+  <script>
+    const questions = [
+      { question: "Ton accessoire ultime ?", options: ["Gadget high-tech", "Lasso empoisonné", "Canne classe", "Un flingue caché"], result: [0, 5, 4, 6] },
+      { question: "Une soirée idéale à Gotham ?", options: ["Sur un toit avec une cape", "Voler des bijoux", "Faire des blagues explosives", "Planter des roses... mortelles"], result: [0, 1, 2, 5] },
+      { question: "Ton plus gros défaut ?", options: ["Solitaire", "Impulsive", "Dingue", "Trop cérébral"], result: [0, 1, 2, 9] },
+      { question: "Ton style de combat ?", options: ["Silencieux et rapide", "Baston chaotique", "Techniques de rue", "Gaz psychotrope"], result: [0, 2, 8, 7] },
+      { question: "Tu agis par...", options: ["Justice", "Amour", "Fun", "Vengeance"], result: [0, 1, 2, 5] },
+      { question: "Ton lieu préféré ?", options: ["Batcave", "Zoo glacé", "Asile d’Arkham", "Un jardin toxique"], result: [0, 4, 2, 5] },
+      { question: "Que penses-tu de Batman ?", options: ["Respect", "Obsession", "Rivalité", "Qui ça ?"], result: [0, 3, 1, 2] }
+    ];
+
+    const characters = [
+      { name: "Batman", description: "Détective sombre, maître de la peur, justicier de la nuit. Tu préfères les ombres à la lumière." },
+      { name: "Catwoman", description: "Tu joues selon tes propres règles, charmeuse et agile, tu es insaisissable... comme un chat." },
+      { name: "Le Joker", description: "Chaos incarné. Ton humour est douteux, ton plan flou, mais tu es toujours imprévisible." },
+      { name: "Harley Quinn", description: "Dingue, drôle et dangereuse. Tu es un cocktail de fun explosif, et personne ne sait ce que tu vas faire ensuite." },
+      { name: "Le Pingouin", description: "Tu préfères manipuler que cogner. Ambitieux, froid et stratège, tu joues aux échecs dans un monde de baston." },
+      { name: "Poison Ivy", description: "Tu as une passion pour la nature… et la vengeance. Belle mais toxique, tu fais pousser la peur dans chaque recoin." },
+      { name: "Double-Face", description: "Tu es le hasard personnifié. Une pièce de monnaie décide si tu es ange ou démon. Bipolaire ? Peut-être." },
+      { name: "L’Épouvantail", description: "Tu transformes les peurs en armes. Ton univers : les cauchemars. Ton hobby : tester les limites mentales." },
+      { name: "Robin", description: "Jeune, vif, loyal. Tu es peut-être à l’ombre de Batman, mais t’as tout pour être une légende à ton tour." },
+      { name: "Le Sphinx (Riddler)", description: "Tu vis pour les énigmes. Intelligent, obsédé par les jeux de l’esprit, chaque question est un piège." }
+    ];
+
+    let currentQuestion = 0;
+    let userAnswers = [];
+
+    function startQuiz() {
+      currentQuestion = 0;
+      userAnswers = [];
+      document.getElementById('result-container').style.display = 'none';
+      document.getElementById('quiz-container').style.display = 'block';
+      showQuestion();
+    }
+
+    function showQuestion() {
+      const question = questions[currentQuestion];
+      document.getElementById('question-text').innerText = question.question;
+
+      const optionsContainer = document.getElementById('options-container');
+      optionsContainer.innerHTML = '';
+
+      question.options.forEach((option, index) => {
+        const button = document.createElement('button');
+        button.innerText = option;
+        button.onclick = () => {
+          userAnswers.push(question.result[index]);
+          currentQuestion++;
+          if (currentQuestion < questions.length) {
+            showQuestion();
+          } else {
+            showResult();
+          }
+        };
+        optionsContainer.appendChild(button);
+      });
+    }
+
+    function showResult() {
+      const resultIndex = userAnswers.reduce((a, b) => a + b, 0) % characters.length;
+      const result = characters[resultIndex];
+
+      document.getElementById('result-text').innerText = `${result.name} - ${result.description}`;
+      document.getElementById('quiz-container').style.display = 'none';
+      document.getElementById('result-container').style.display = 'block';
+    }
+
+    startQuiz();
+  </script>
+</body>
+</html>
